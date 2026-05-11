@@ -26,7 +26,7 @@ export default function Hero() {
 
             <div className="md:w-1/2 relative">
                 <div className="rounded-[40px] overflow-hidden shadow-xl border-8 border-white">
-                    <img src="/hero-dog.jpg" alt="Girl with dog" className="w-full h-full object-cover" />
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTN2UZ6AC5OA6YnHzNOBBZNY5QmH_c4DmriYw&s" alt="Girl with dog" className="w-full h-full object-cover" />
                 </div>
                 {/* Картка трекінгу */}
                 <Link to="/training" className="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl shadow-2xl border border-surface-primary max-w-[220px] hover:scale-105 transition-transform">
