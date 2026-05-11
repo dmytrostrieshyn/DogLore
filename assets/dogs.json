@@ -115,7 +115,7 @@
     "origin": "Німеччина",
     "size": "Великий",
     "life_expectancy": "10-12 років",
-    "temperament": ["Бдительний", "Безстрашний", "Відданий"],
+    "temperament": ["Пильний", "Безстрашний", "Відданий"],
     "description": "Елегантний захисник з блискавичною реакцією.",
     "image_url": "assets/images/doberman.jpg"
   },
@@ -145,7 +145,7 @@
     "origin": "Китай",
     "size": "Малий",
     "life_expectancy": "12-15 років",
-    "temperament": ["Обаяльний", "Пустотливий", "Мирний"],
+    "temperament": ["Чарівний", "Пустотливий", "Мирний"],
     "description": "Маленький собака з великим почуттям гумору.",
     "image_url": "assets/images/pug.jpg"
   },
