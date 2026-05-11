@@ -1,8 +1,8 @@
 // src/App.jsx
-import Home from './pages/Home.jsx';
+import Training from './pages/Training.jsx';
 
 function App() {
-    return <Home />;
+    return <Training />;
 }
 
 export default App;
