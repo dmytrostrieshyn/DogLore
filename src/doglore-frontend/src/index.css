@@ -1,1 +1,38 @@
 @import "tailwindcss";
+
+@theme {
+    /* Кольори */
+    --color-brand-primary: #173124;
+    --color-brand-secondary: #2D4739;
+    --color-brand-accent: #FEAE87;
+    --color-brand-light-sage: #98B5A3;
+    --color-bg-main: #F6F3F2;
+    --color-bg-warm: #FBF9F8;
+    --color-text-primary: #1B1C1C;
+    --color-text-secondary: #424844;
+    --color-text-muted: #6B7280;
+    --color-surface-primary: #EAE8E7;
+    --color-surface-dark: #41423F;
+    --color-surface-positive: #B0CDBB;
+    /* Шрифти */
+    --font-montserrat: "Montserrat", sans-serif;
+    --font-inter: "Inter", sans-serif;
+}
+
+@layer components {
+    .h1 {
+        @apply font-montserrat font-bold text-[40px] leading-[50px] text-text-primary;
+    }
+
+    .h2 {
+        @apply font-montserrat font-bold text-[32px] leading-[40px] text-text-primary;
+    }
+
+    .body-standard {
+        @apply font-inter font-normal text-[16px] leading-[28px] text-text-secondary;
+    }
+
+    .btn-primary {
+        @apply bg-brand-primary text-white px-6 py-3 rounded-lg font-montserrat font-semibold hover:bg-brand-secondary transition-all;
+    }
+}
