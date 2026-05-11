@@ -1,122 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Auth from './pages/Auth';
+
+// Тимчасові компоненти, поки Богдан і Денис готують контент
+const Home = () => (
+  <div className="p-10 text-center">
+    <h1 className="text-4xl font-bold text-gray-800">Ласкаво просимо до DogLore! 🐾</h1>
+    <p className="mt-4 text-gray-600 text-lg">Найкраще місце для вас та вашого улюбленця.</p>
+  </div>
+);
+
+const Encyclopedia = () => <div className="p-10 text-2xl font-bold">📖 Тут буде енциклопедія порід</div>;
+const Profile = () => <div className="p-10 text-2xl font-bold">🐶 Особистий кабінет собаки</div>;
+
+const Navbar = () => (
+  <nav className="bg-gray-900 text-white p-4 shadow-lg">
+    <div className="container mx-auto flex justify-between items-center">
+      <div className="flex gap-6 items-center">
+        <Link to="/" className="text-xl font-black tracking-tighter hover:text-blue-400 transition">DOGLORE</Link>
+        <Link to="/encyclopedia" className="hover:text-blue-400 transition">Енциклопедія</Link>
+        <Link to="/profile" className="hover:text-blue-400 transition">Мій Кабінет</Link>
+      </div>
+      <div>
+        <Link to="/auth" className="bg-blue-600 px-5 py-2 rounded-full font-bold hover:bg-blue-700 transition">
+          Увійти
+        </Link>
+      </div>
+    </div>
+  </nav>
+);
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <Router>
+      <div className="min-h-screen bg-white text-gray-900">
+        <Navbar />
+        <main className="container mx-auto">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/encyclopedia" element={<Encyclopedia />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/auth" element={<Auth />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;
