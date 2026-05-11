@@ -98,5 +98,105 @@
     "temperament": ["Веселий", "Енергійний", "Відданий"],
     "description": "Відомий своїм грайливим характером і терпінням до дітей.",
     "image_url": "assets/images/boxer.jpg"
+  },
+  {
+    "id": "pomeranian",
+    "name": "Померанський шпіц",
+    "origin": "Польща/Німеччина",
+    "size": "Малий",
+    "life_expectancy": "12-16 років",
+    "temperament": ["Жвавий", "Товариський", "Розумний"],
+    "description": "Крихітний собака з пишною шерстю та великою особистістю.",
+    "image_url": "assets/images/pomeranian.jpg"
+  },
+  {
+    "id": "doberman",
+    "name": "Доберман",
+    "origin": "Німеччина",
+    "size": "Великий",
+    "life_expectancy": "10-12 років",
+    "temperament": ["Бдительний", "Безстрашний", "Відданий"],
+    "description": "Елегантний захисник з блискавичною реакцією.",
+    "image_url": "assets/images/doberman.jpg"
+  },
+  {
+    "id": "border-collie",
+    "name": "Бордер-коллі",
+    "origin": "Велика Британія",
+    "size": "Середній",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Надзвичайно розумний", "Енергійний", "Спритний"],
+    "description": "Вважається найрозумнішою породою собак у світі.",
+    "image_url": "assets/images/border_collie.jpg"
+  },
+  {
+    "id": "chihuahua",
+    "name": "Чихуахуа",
+    "origin": "Мексика",
+    "size": "Дуже малий",
+    "life_expectancy": "14-20 років",
+    "temperament": ["Відданий", "Самовпевнений", "Швидкий"],
+    "description": "Найменший собака у світі з дуже довгим терміном життя.",
+    "image_url": "assets/images/chihuahua.jpg"
+  },
+  {
+    "id": "pug",
+    "name": "Мопс",
+    "origin": "Китай",
+    "size": "Малий",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Обаяльний", "Пустотливий", "Мирний"],
+    "description": "Маленький собака з великим почуттям гумору.",
+    "image_url": "assets/images/pug.jpg"
+  },
+  {
+    "id": "jack-russell",
+    "name": "Джек-рассел-тер'єр",
+    "origin": "Велика Британія",
+    "size": "Малий",
+    "life_expectancy": "13-16 років",
+    "temperament": ["Невтомний", "Сміливий", "Розумний"],
+    "description": "Енергійна собака, яка потребує багато активності та ігор.",
+    "image_url": "assets/images/jack_russell.jpg"
+  },
+  {
+    "id": "cocker-spaniel",
+    "name": "Кокер-спанієль",
+    "origin": "Велика Британія",
+    "size": "Середній",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Ніжний", "Радісний", "Чуйний"],
+    "description": "Красивий собака з довгими вухами та м'яким характером.",
+    "image_url": "assets/images/cocker_spaniel.jpg"
+  },
+  {
+    "id": "dalmatian",
+    "name": "Далматин",
+    "origin": "Хорватія",
+    "size": "Великий",
+    "life_expectancy": "11-13 років",
+    "temperament": ["Енергійний", "Розумний", "Товариський"],
+    "description": "Легко впізнаваний завдяки своїм чорним плямам на білій шерсті.",
+    "image_url": "assets/images/dalmatian.jpg"
+  },
+  {
+    "id": "shiba-inu",
+    "name": "Шіба-іну",
+    "origin": "Японія",
+    "size": "Середній",
+    "life_expectancy": "13-16 років",
+    "temperament": ["Незалежний", "Вірний", "Пильний"],
+    "description": "Найпопулярніша японська порода, схожа на маленьку лисицю.",
+    "image_url": "assets/images/shiba_inu.jpg"
+  },
+  {
+    "id": "chow-chow",
+    "name": "Чау-чау",
+    "origin": "Китай",
+    "size": "Великий",
+    "life_expectancy": "8-12 років",
+    "temperament": ["Гордий", "Незалежний", "Відданий"],
+    "description": "Відомий своєю левовою гривою та фіолетовим язиком.",
+    "image_url": "assets/images/chow_chow.jpg"
   }
 ]
