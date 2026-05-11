@@ -1,17 +1,45 @@
-// src/pages/Encyclopedia.jsx
+import { useEffect, useState } from 'react';
 import Navbar from './layout/Navbar.jsx';
 import DogCard from './components/DogCard';
-
-//потім замінити на реальну бд
-const DOGS_DATA = [
-    { name: 'Золотистий ретривер', size: 'Великий', type: 'Мисливські', description: 'Розумні, доброзичливі та віддані. Вони славляться своїм терплячим характером...', image: 'data:image/jpeg;base64,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' },
-    { name: 'Французький бульдог', size: 'Малий', type: 'Компаньйони', description: 'Грайливі, адаптивні та кмітливі. Чудові компаньйони, які люблять бути в центрі уваги.', image: '/frenchie.jpg' },
-    { name: 'Сибірський хаскі', size: 'Середній', type: 'Робочі', description: 'Товариські, пустотливі та енергійні. Відомі своєю витривалістю та гарним вокалом.', image: '/husky.jpg' },
-    { name: 'Бордер-коллі', size: 'Середній', type: 'Пастуші', description: 'Працелюбні, розумні та енергійні. Вважаються найрозумнішими серед усіх собак.', image: '/border-collie.jpg' },
-    // Додай більше об'єктів за потреби
-];
+import { fetchAllBreeds, searchBreeds } from '../services/api/breedsApi';
 
 export default function Encyclopedia() {
+    const [breeds, setBreeds] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [sizeFilter, setSizeFilter] = useState('За розміром');
+
+    // Завантаження всіх порід при старті
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            const data = await fetchAllBreeds();
+            setBreeds(data || []);
+            setLoading(false);
+        };
+        loadData();
+    }, []);
+
+    // Логіка пошуку
+    const handleSearch = async (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        
+        if (value.trim().length > 1) {
+            const results = await searchBreeds(value);
+            setBreeds(results);
+        } else if (value.trim().length === 0) {
+            const all = await fetchAllBreeds();
+            setBreeds(all);
+        }
+    };
+
+    // Фільтрація за розміром (клієнтська частина для швидкості)
+    const filteredBreeds = breeds.filter(dog => {
+        if (sizeFilter === 'За розміром') return true;
+        return dog.size === sizeFilter;
+    });
+
     return (
         <div className="min-h-screen bg-bg-main">
             <Navbar />
@@ -19,50 +47,73 @@ export default function Encyclopedia() {
             <main className="max-w-7xl mx-auto px-6 md:px-12 py-16">
                 {/* Заголовок */}
                 <div className="text-center md:text-left mb-12">
-                    <h1 className="h1 text-4xl mb-4">Енциклопедія собак</h1>
-                    <p className="body-standard max-w-2xl text-text-secondary">
-                        Відкрийте для себе детальні профілі понад 200 порід собак. Від темпераменту
+                    <h1 className="text-4xl font-extrabold font-montserrat mb-4 text-text-primary tracking-tight">
+                        Енциклопедія собак 📖
+                    </h1>
+                    <p className="text-text-secondary max-w-2xl text-lg">
+                        Відкрийте для себе детальні профілі порід. Від темпераменту 
                         до особливостей догляду — знайдіть ідеального компаньйона.
                     </p>
                 </div>
 
                 {/* Фільтри та Пошук */}
                 <div className="flex flex-col md:flex-row gap-4 mb-12">
-                    <div className="flex-1 relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40">🔍</span>
+                    <div className="flex-1 relative group">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40 group-focus-within:opacity-100 transition-opacity">🔍</span>
                         <input
                             type="text"
+                            value={searchTerm}
+                            onChange={handleSearch}
                             placeholder="Пошук порід (напр. Золотистий ретривер)"
-                            className="w-full pl-12 pr-4 py-4 rounded-2xl bg-bg-warm border border-surface-primary focus:outline-none focus:ring-2 ring-brand-light-sage/30 transition"
+                            className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white border border-surface-primary shadow-sm focus:outline-none focus:ring-2 ring-brand-primary/20 transition-all"
                         />
                     </div>
-                    <select className="px-6 py-4 rounded-2xl bg-bg-warm border border-surface-primary font-medium text-text-secondary outline-none">
+                    
+                    <select 
+                        value={sizeFilter}
+                        onChange={(e) => setSizeFilter(e.target.value)}
+                        className="px-6 py-4 rounded-2xl bg-white border border-surface-primary font-bold text-text-secondary outline-none cursor-pointer hover:border-brand-primary transition-colors"
+                    >
                         <option>За розміром</option>
                         <option>Малі</option>
                         <option>Середні</option>
                         <option>Великі</option>
                     </select>
-                    <select className="px-6 py-4 rounded-2xl bg-bg-warm border border-surface-primary font-medium text-text-secondary outline-none">
+
+                    <select className="px-6 py-4 rounded-2xl bg-white border border-surface-primary font-bold text-text-secondary outline-none opacity-50 cursor-not-allowed">
                         <option>За призначенням</option>
-                        <option>Мисливські</option>
-                        <option>Пастуші</option>
-                        <option>Робочі</option>
                     </select>
                 </div>
 
-                {/* Сітка карток */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {DOGS_DATA.map((dog, index) => (
-                        <DogCard key={index} {...dog} />
-                    ))}
-                </div>
+                {/* Стан завантаження */}
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="font-bold text-brand-earth">Шукаємо найкращих друзів у базі...</p>
+                    </div>
+                ) : (
+                    <>
+                        {/* Сітка карток */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {filteredBreeds.length > 0 ? (
+                                filteredBreeds.map((dog, index) => (
+                                    <DogCard key={dog.id || index} {...dog} />
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-10">
+                                    <p className="text-xl font-bold text-text-muted italic">На жаль, таку породу не знайдено 🐾</p>
+                                </div>
+                            )}
+                        </div>
 
-                {/* Пагінація */}
-                <div className="mt-20 flex justify-center items-center gap-6 font-inter">
-                    <button className="w-10 h-10 flex items-center justify-center border border-surface-primary rounded-full hover:bg-white transition">←</button>
-                    <span className="text-sm font-bold text-text-primary">Сторінка 1 із 24</span>
-                    <button className="w-10 h-10 flex items-center justify-center border border-surface-primary rounded-full hover:bg-white transition">→</button>
-                </div>
+                        {/* Пагінація */}
+                        <div className="mt-20 flex justify-center items-center gap-6">
+                            <button className="w-12 h-12 flex items-center justify-center border border-surface-primary rounded-full hover:bg-white hover:shadow-md transition-all active:scale-95 disabled:opacity-30" disabled>←</button>
+                            <span className="text-sm font-black text-text-primary uppercase tracking-widest">Сторінка 1</span>
+                            <button className="w-12 h-12 flex items-center justify-center border border-surface-primary rounded-full hover:bg-white hover:shadow-md transition-all active:scale-95 disabled:opacity-30" disabled>→</button>
+                        </div>
+                    </>
+                )}
             </main>
         </div>
     );
