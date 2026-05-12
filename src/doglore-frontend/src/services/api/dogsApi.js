@@ -1,8 +1,16 @@
 import { db } from "../firebase.js";
-import { doc, getDoc } from "firebase/firestore";
-import { getSubcollectionData, createDocument, createSubdocument } from "../dbService.js";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+// Імпортуємо твої універсальні інструменти
+import {
+    getSubcollectionData,
+    createDocument,
+    createSubdocument
+} from "../dbService.js";
 
-// Отримати дані однієї собаки за ID + дані її породи
+/**
+ * 1. Отримати ПОВНИЙ профіль собаки
+ * (Використовуємо прямий getDoc, бо нам потрібен конкретний ID + дані породи)
+ */
 export const fetchDogFullProfile = async (dogId) => {
     try {
         const dogRef = doc(db, "dogs", dogId);
@@ -10,8 +18,7 @@ export const fetchDogFullProfile = async (dogId) => {
 
         if (dogSnap.exists()) {
             const dogData = dogSnap.data();
-
-            // Отримуємо дані про породу, використовуючи breed_id зі сторінки собаки
+            // Тягнемо інфу про породу через її ID
             const breedRef = doc(db, "breeds", dogData.breed_id);
             const breedSnap = await getDoc(breedRef);
 
@@ -23,62 +30,61 @@ export const fetchDogFullProfile = async (dogId) => {
         }
         return null;
     } catch (error) {
-        console.error("Помилка профілю:", error);
-    }
-};
-
-// Отримати історію ваги для графіка (твоя підколекція health_logs)
-export const fetchDogWeightHistory = (dogId) => {
-    return getSubcollectionData(`dogs/${dogId}/health_logs`);
-};
-
-
-export const fetchDogJournal = (dogId) => {
-    // Тут ми звертаємось до підколекції training_logs щоб отримати данні із щоденника собаки
-    return getSubcollectionData(`dogs/${dogId}/training_logs`);
-};
-
-// приклад, як треба передаавти данні у функцію
-//const newDog = {
-//    dogName: "укцк",
-//    breed_id: "ID_ПОРОДИ_З_ЕНЦИКЛОПЕДІЇ", // Обов'язково ID документа з колекції breeds
-//    gender: "Male",
-//    chip: "123-456-789",
-//    nutrition: "Natural food",
-//    trainingNotes: "", // Поки що порожньо
-//};
-
-export const registerDog = async (dogData) => {
-    try {
-        // Перевіряємо, чи передали id породи, щоб не було порожніх профілів
-        if (!dogData.breed_id) throw new Error("Необхідно вказати ID породи");
-
-        const newDogId = await createDocument("dogs", dogData);
-        console.log("Собаку успішно зареєстровано з ID:", newDogId);
-        return newDogId;
-    } catch (error) {
-        console.error("Помилка при реєстрації собаки:", error);
+        console.error("Помилка отримання профілю:", error);
         throw error;
     }
 };
 
-//const healthData = {
-//    weight: 42.5,
-//    status: "Чудовий",
-//    lastCheckup: "Вакцинація пройшла успішно"
-//};
+/**
+ * 2. Реєстрація нової собаки
+ * (Використовуємо твій createDocument)
+ */
+export const registerDog = (dogData) => createDocument("dogs", dogData);
 
-// Додавання запису в Health Log
-export const addHealthLog = (dogId, healthData) =>
-    createSubdocument(`dogs/${dogId}/health_logs`, healthData);
+/**
+ * 3. Оновлення приміток та Календаря
+ * (Тут updateDoc, бо ми змінюємо існуючий документ собаки)
+ */
+export const updateTrainingNotes = async (dogId, newNotes) => {
+    const dogRef = doc(db, "dogs", dogId);
+    return await updateDoc(dogRef, {
+        trainingNotes: newNotes,
+        // Додаємо дату в масив для персикових кіл на календарі
+        completedTrainingDates: arrayUnion(new Date().toISOString().split('T')[0])
+    });
+};
 
+/**
+ * 4. Отримати історію ваги (health_logs)
+ * (Використовуємо твій getSubcollectionData)
+ */
+export const fetchDogWeightHistory = (dogId) => {
+    return getSubcollectionData(`dogs/${dogId}/health_logs`);
+};
 
-//const trainingData = {
-//    command: "Сидіти",
-//    mastery: 85,
-//    notes: "Добре реагує на ласощі"
-//};
+/**
+ * 5. Отримати список команд (training_logs)
+ * (Використовуємо твій getSubcollectionData)
+ */
+export const fetchTrainingLogs = (dogId) => {
+    return getSubcollectionData(`dogs/${dogId}/training_logs`);
+};
 
-// Додавання запису в Training Log
-export const addTrainingLog = (dogId, trainingData) =>
-    createSubdocument(`dogs/${dogId}/training_logs`, trainingData);
+/**
+ * 6. Додати нову команду (Training Log)
+ * (Використовуємо твій createSubdocument)
+ */
+export const addNewCommand = (dogId, commandName) => {
+    return createSubdocument(`dogs/${dogId}/training_logs`, {
+        name: commandName,
+        progress: 0
+    });
+};
+
+/**
+ * 7. Отримати галерею (chronology)
+ * (Використовуємо твій getSubcollectionData)
+ */
+export const fetchDogGallery = (dogId) => {
+    return getSubcollectionData(`dogs/${dogId}/chronology`);
+};
