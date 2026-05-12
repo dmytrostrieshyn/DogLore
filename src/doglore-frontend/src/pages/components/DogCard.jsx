@@ -1,19 +1,29 @@
 export default function DogCard({ name, size, description, type, image }) {
     return (
-        <div className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-surface-primary hover:shadow-md transition-shadow group">
-            <div className="relative h-64">
-                <img src={image} alt={name} className="w-full h-full object-cover transition transform group-hover:scale-105" />
-                <span className="absolute top-4 left-4 bg-brand-accent/80 backdrop-blur-sm text-brand-earth text-[10px] font-bold px-3 py-1 rounded-full uppercase">
-                    {type}
+        <div className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-surface-primary hover:shadow-md transition-shadow group flex flex-col">
+            <div className="relative h-56"> {/* Трохи зменшив висоту, щоб пропорції були як у Фігмі */}
+                <img 
+                    src={image || "/buddy-large.jpg"} 
+                    alt={name} 
+                    className="w-full h-full object-cover transition transform duration-500 group-hover:scale-105" 
+                />
+                
+                {/* Виправлений бейдж: точні HEX-кольори з Фігми та нормальний padding */}
+                <span className="absolute top-4 left-4 bg-[#F2C9B3] text-[#4A3B32] text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    {type || "Компаньйон"}
                 </span>
             </div>
-            <div className="p-6">
-                <h3 className="h2 text-xl mb-1">{name}</h3>
-                <p className="text-[12px] text-text-muted mb-4 flex items-center gap-1">
-                    🏠 {size}
+            
+            <div className="p-6 flex-1 flex flex-col">
+                <h3 className="font-montserrat font-bold text-xl mb-1 text-text-primary">{name}</h3>
+                
+                <p className="text-[12px] text-text-muted mb-4 flex items-center gap-2 font-bold">
+                    {/* Зробив емодзі сірим, щоб він виглядав як іконка з Фігми */}
+                    <span className="grayscale opacity-70">🏠</span> {size || "Середній"}
                 </p>
+                
                 <p className="text-sm text-text-secondary line-clamp-3 leading-relaxed">
-                    {description}
+                    {description || "Детальний опис цієї породи скоро з'явиться..."}
                 </p>
             </div>
         </div>

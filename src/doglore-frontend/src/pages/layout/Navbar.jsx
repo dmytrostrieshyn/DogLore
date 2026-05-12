@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom';
+// Імпортуємо іконки. Шлях розрахований так: виходимо з layout -> виходимо з pages -> заходимо в assets
+import notificationIcon from '../../assets/icons/notification.svg';
+import profileIcon from '../../assets/icons/profile.svg';
 
 export default function Navbar() {
     return (
@@ -21,8 +24,12 @@ export default function Navbar() {
             </ul>
 
             <div className="flex gap-4 items-center">
-                <button className="p-2 text-text-secondary">🔔</button>
-                <Link to="/profile" className="p-2 text-text-secondary">👤</Link>
+                <button className="p-2 hover:opacity-80 transition-opacity">
+                    <img src={notificationIcon} alt="Сповіщення" className="w-6 h-6" />
+                </button>
+                <Link to="/profile" className="p-2 hover:opacity-80 transition-opacity">
+                    <img src={profileIcon} alt="Профіль" className="w-6 h-6" />
+                </Link>
             </div>
         </nav>
     );
