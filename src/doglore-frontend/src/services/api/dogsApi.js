@@ -31,3 +31,9 @@ export const fetchDogFullProfile = async (dogId) => {
 export const fetchDogWeightHistory = (dogId) => {
     return getSubcollectionData(`dogs/${dogId}/health_logs`);
 };
+
+
+export const fetchDogJournal = (dogId) => {
+    // Тут ми звертаємось до підколекції training_logs щоб отримати данні із щоденника собаки
+    return getSubcollectionData(`dogs/${dogId}/training_logs`);
+};
