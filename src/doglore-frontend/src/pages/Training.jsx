@@ -2,29 +2,47 @@ import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Navbar from './layout/Navbar';
 import { fetchTrainingLogs, updateTrainingNotes } from '../services/api/trainingApi';
+import { fetchDogFullProfile } from '../services/api/dogsApi';
+import { useAuth } from '../context/AuthContext';
 
 // Імпортуємо SVG-іконку для кнопки додавання команди
 import addCommandIcon from '../assets/icons/add_command.svg';
 
 export default function Training() {
+    const { dogId } = useAuth();
     const [commands, setCommands] = useState([]);
     const [notes, setNotes] = useState('');
+    const [completedDates, setCompletedDates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-
-    // Використовуємо реальний ID твоєї собаки
-    const dogId = "odlQ8Y0niiv0wJ3JK2Kk";
 
     useEffect(() => {
         if (!dogId) return;
         
-        setLoading(true);
-        fetchTrainingLogs(dogId)
-            .then(data => {
-                setCommands(data || []);
-            })
-            .catch(err => console.error("Помилка завантаження команд:", err))
-            .finally(() => setLoading(false));
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                // Тягнемо паралельно команди (підколекція) та сам профіль (для приміток)
+                const [logsData, profileData] = await Promise.all([
+                    fetchTrainingLogs(dogId),
+                    fetchDogFullProfile(dogId)
+                ]);
+
+                setCommands(logsData || []);
+                
+                // Якщо в базі є збережені примітки та дати — підтягуємо їх
+                if (profileData) {
+                    setNotes(profileData.trainingNotes || '');
+                    setCompletedDates(profileData.completedTrainingDates || []);
+                }
+            } catch (err) {
+                console.error("Помилка завантаження трекінгу:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, [dogId]);
 
     const handleSaveNotes = async () => {
@@ -32,6 +50,12 @@ export default function Training() {
         try {
             await updateTrainingNotes(dogId, notes);
             alert('Примітки успішно збережено!');
+            
+            // Локально додаємо сьогоднішню дату в стейт, щоб календар одразу оновився
+            const today = new Date().toISOString().split('T')[0]; // Формат YYYY-MM-DD
+            if (!completedDates.includes(today)) {
+                setCompletedDates(prev => [...prev, today]);
+            }
         } catch (e) {
             console.error(e);
             alert('Помилка при збереженні приміток');
@@ -59,7 +83,7 @@ export default function Training() {
                                 <div className="flex justify-between items-center mb-8">
                                     <h3 className="text-2xl font-bold font-montserrat">Активні команди</h3>
                                     <span className="bg-[#F2C9B3]/40 text-[#D9774E] text-[10px] font-bold px-3 py-1.5 rounded-full uppercase">
-                                        3 Goals This Week
+                                        {commands.length} в процесі
                                     </span>
                                 </div>
 
@@ -67,31 +91,36 @@ export default function Training() {
                                     {loading ? (
                                         <p className="text-text-muted animate-pulse">Завантаження команд...</p>
                                     ) : commands.length > 0 ? (
-                                        commands.map((cmd, i) => (
-                                            <div key={i} className="space-y-2">
-                                                <div className="flex justify-between items-center text-sm font-bold">
-                                                    <div className="flex items-center gap-4">
-                                                        {/* Кастомний чекбокс як у Фігмі */}
-                                                        <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center transition-colors border-2 ${cmd.progress === 100 ? 'bg-[#1A2B21] border-[#1A2B21]' : 'bg-transparent border-gray-300'}`}>
-                                                            {cmd.progress === 100 && (
-                                                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                                </svg>
-                                                            )}
+                                        commands.map((cmd, i) => {
+                                            // Переконуємось, що прогрес це число
+                                            const progressVal = Number(cmd.progress) || 0;
+                                            const isMastered = progressVal === 100;
+
+                                            return (
+                                                <div key={cmd.id || i} className="space-y-2">
+                                                    <div className="flex justify-between items-center text-sm font-bold">
+                                                        <div className="flex items-center gap-4">
+                                                            {/* Кастомний чекбокс */}
+                                                            <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center transition-colors border-2 ${isMastered ? 'bg-[#1A2B21] border-[#1A2B21]' : 'bg-transparent border-gray-300'}`}>
+                                                                {isMastered && (
+                                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-base text-[#1A2B21]">{cmd.name}</span>
                                                         </div>
-                                                        <span className="text-base text-[#1A2B21]">{cmd.name}</span>
+                                                        <span className="text-text-muted text-xs">{progressVal}% Mastery</span>
                                                     </div>
-                                                    <span className="text-text-muted text-xs">{cmd.progress}% Mastery</span>
+                                                    <div className="h-2.5 bg-[#F9ECE4] rounded-full overflow-hidden mt-2">
+                                                        <div 
+                                                            className="h-full bg-[#F2C9B3] transition-all duration-700 rounded-full" 
+                                                            style={{ width: `${progressVal}%` }} 
+                                                        />
+                                                    </div>
                                                 </div>
-                                                {/* Смуга прогресу */}
-                                                <div className="h-2.5 bg-[#F9ECE4] rounded-full overflow-hidden mt-2">
-                                                    <div 
-                                                        className="h-full bg-[#F2C9B3] transition-all duration-700 rounded-full" 
-                                                        style={{ width: `${cmd.progress}%` }} 
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <p className="text-text-muted italic">Ще немає активних команд. Додайте першу!</p>
                                     )}
@@ -120,14 +149,16 @@ export default function Training() {
 
                         </div>
 
-                        {/* Права частина: Календар та Додавання команд */}
+                        {/* Права частина */}
                         <div className="space-y-6">
                             
-                            {/* Календар під дизайн Фігми */}
+                            {/* Календар */}
                             <div className="bg-[#1A2B21] text-white p-8 rounded-[32px] shadow-lg">
-                                <h4 className="font-bold mb-6 font-montserrat text-sm">Жовтень 2026</h4>
+                                <h4 className="font-bold mb-6 font-montserrat text-sm flex justify-between">
+                                    <span>Жовтень 2026</span>
+                                    <span className="text-brand-accent text-[10px] uppercase">Активних днів: {completedDates.length}</span>
+                                </h4>
                                 <div className="grid grid-cols-7 gap-y-4 text-[10px] text-center font-bold items-center">
-                                    {/* Дні тижня */}
                                     <span className="text-white/50 mb-2">S</span>
                                     <span className="text-white/50 mb-2">M</span>
                                     <span className="text-white/50 mb-2">T</span>
@@ -136,18 +167,17 @@ export default function Training() {
                                     <span className="text-white/50 mb-2">F</span>
                                     <span className="text-white/50 mb-2">S</span>
                                     
-                                    {/* Дати (Візуал) */}
+                                    {/* Візуал календаря. В майбутньому тут можна додати логіку генерації чисел місяця 
+                                        та перевірку completedDates.includes(`2026-10-${day}`) */}
                                     <div className="text-white/30 font-medium">29</div>
                                     <div className="text-white/30 font-medium">30</div>
                                     <div className="font-medium">1</div>
-                                    {/* Виділена дата (персикова) */}
                                     <div className="w-7 h-7 mx-auto flex items-center justify-center bg-[#F2C9B3] text-[#1A2B21] rounded-full cursor-pointer hover:scale-110 transition-transform">2</div>
                                     <div className="font-medium">3</div>
                                     <div className="font-medium">4</div>
                                     <div className="font-medium">5</div>
                                     
                                     <div className="font-medium">6</div>
-                                    {/* Виділена дата (персикова) */}
                                     <div className="w-7 h-7 mx-auto flex items-center justify-center bg-[#F2C9B3] text-[#1A2B21] rounded-full cursor-pointer hover:scale-110 transition-transform">7</div>
                                     <div className="font-medium">8</div>
                                     <div className="font-medium">9</div>
@@ -157,9 +187,7 @@ export default function Training() {
                                     
                                     <div className="font-medium">13</div>
                                     <div className="font-medium">14</div>
-                                    {/* Виділена дата (персикова) */}
                                     <div className="w-7 h-7 mx-auto flex items-center justify-center bg-[#F2C9B3] text-[#1A2B21] rounded-full cursor-pointer hover:scale-110 transition-transform">15</div>
-                                    {/* Поточна дата (обідок) */}
                                     <div className="w-7 h-7 mx-auto flex items-center justify-center border-2 border-white rounded-full cursor-pointer">16</div>
                                     <div className="font-medium">17</div>
                                     <div className="font-medium">18</div>
@@ -181,10 +209,9 @@ export default function Training() {
                                 </div>
                             </div>
 
-                            {/* Кнопка "Додати команду" із SVG */}
+                            {/* Кнопка "Додати команду" */}
                             <div className="border border-dashed border-gray-300 bg-[#F8F9FA] rounded-[32px] p-8 text-center flex flex-col items-center justify-center gap-4 hover:bg-white transition-colors cursor-pointer group">
                                 <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300 border border-gray-100">
-                                    {/* Ваша іконка додавання */}
                                     <img src={addCommandIcon} alt="Додати" className="w-4 h-4 opacity-80" />
                                 </div>
                                 <div>

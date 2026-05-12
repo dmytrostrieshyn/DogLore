@@ -88,3 +88,11 @@ export const addNewCommand = (dogId, commandName) => {
 export const fetchDogGallery = (dogId) => {
     return getSubcollectionData(`dogs/${dogId}/chronology`);
 };
+
+/**
+ * 8. Оновити профіль собаки (довільні поля)
+ */
+export const updateDogProfile = async (dogId, fields) => {
+    const dogRef = doc(db, 'dogs', dogId);
+    return await updateDoc(dogRef, fields);
+};

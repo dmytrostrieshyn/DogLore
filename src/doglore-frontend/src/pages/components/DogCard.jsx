@@ -1,4 +1,4 @@
-export default function DogCard({ name, size, description, type, image }) {
+export default function DogCard({ name, size, description, type, image, temperament }) {
     return (
         <div className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-surface-primary hover:shadow-md transition-shadow group flex flex-col">
             <div className="relative h-56"> {/* Трохи зменшив висоту, щоб пропорції були як у Фігмі */}
@@ -10,7 +10,7 @@ export default function DogCard({ name, size, description, type, image }) {
                 
                 {/* Виправлений бейдж: точні HEX-кольори з Фігми та нормальний padding */}
                 <span className="absolute top-4 left-4 bg-[#F2C9B3] text-[#4A3B32] text-[10px] font-bold px-3 py-1.5 rounded-full">
-                    {type || "Компаньйон"}
+                    {type || temperament}
                 </span>
             </div>
             
