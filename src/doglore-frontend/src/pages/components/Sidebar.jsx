@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { fetchDogFullProfile } from '../../services/api/dogsApi';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,6 +11,16 @@ import addIcon from '../../assets/icons/add.svg';
 export default function Sidebar() {
     const { dogId, logout } = useAuth();
     const [dog, setDog] = useState(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleAddEntry = () => {
+        if (location.pathname === '/profile') {
+            document.getElementById('journal-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            navigate('/profile', { state: { scrollTo: 'journal' } });
+        }
+    };
 
     // Витягуємо міні-профіль для шапки сайдбару
     useEffect(() => {
@@ -96,7 +106,10 @@ export default function Sidebar() {
             </nav>
 
             {/* Кнопка дії з іконкою add.svg */}
-            <button className="w-full mt-6 bg-[#1A2B21] text-white py-4 rounded-[16px] font-bold flex items-center justify-center gap-3 hover:bg-opacity-90 transition-all shadow-md active:scale-95">
+            <button
+                onClick={handleAddEntry}
+                className="w-full mt-6 bg-[#1A2B21] text-white py-4 rounded-[16px] font-bold flex items-center justify-center gap-3 hover:bg-opacity-90 transition-all shadow-md active:scale-95"
+            >
                 <img src={addIcon} alt="Додати" className="w-4 h-4 invert brightness-0" />
                 Додати запис
             </button>

@@ -1,6 +1,5 @@
 import { db } from "../firebase.js";
-import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
-// Імпортуємо твої універсальні інструменти
+import { doc, getDoc, updateDoc, arrayUnion, collection } from "firebase/firestore";
 import {
     getSubcollectionData,
     createDocument,
@@ -18,14 +17,17 @@ export const fetchDogFullProfile = async (dogId) => {
 
         if (dogSnap.exists()) {
             const dogData = dogSnap.data();
-            // Тягнемо інфу про породу через її ID
-            const breedRef = doc(db, "breeds", dogData.breed_id);
-            const breedSnap = await getDoc(breedRef);
+
+            let breedInfo = null;
+            if (dogData.breed_id) {
+                const breedSnap = await getDoc(doc(db, "breeds", dogData.breed_id));
+                breedInfo = breedSnap.exists() ? breedSnap.data() : null;
+            }
 
             return {
                 id: dogSnap.id,
                 ...dogData,
-                breedInfo: breedSnap.exists() ? breedSnap.data() : null
+                breedInfo
             };
         }
         return null;
@@ -96,3 +98,35 @@ export const updateDogProfile = async (dogId, fields) => {
     const dogRef = doc(db, 'dogs', dogId);
     return await updateDoc(dogRef, fields);
 };
+
+/**
+ * 9. Додати запис ваги в health_logs
+ */
+export const addWeightEntry = (dogId, value, label) =>
+    createSubdocument(`dogs/${dogId}/health_logs`, { value: Number(value), label });
+
+/**
+ * 11. Додати фото до галереї (chronology)
+ */
+export const addGalleryPhoto = (dogId, imageURL, ageLabel = '') =>
+    createSubdocument(`dogs/${dogId}/chronology`, { imageURL, ageLabel });
+
+/**
+ * 12. Оновити прогрес команди в training_logs
+ */
+export const updateCommandProgress = async (dogId, commandId, progress) => {
+    const cmdRef = doc(db, 'dogs', dogId, 'training_logs', commandId);
+    return updateDoc(cmdRef, { progress: Math.min(100, Math.max(0, progress)) });
+};
+
+/**
+ * 13. Отримати записи щоденника (journal)
+ */
+export const fetchJournalEntries = (dogId) =>
+    getSubcollectionData(`dogs/${dogId}/journal`);
+
+/**
+ * 14. Додати запис до щоденника
+ */
+export const addJournalEntry = (dogId, imageURL, description) =>
+    createSubdocument(`dogs/${dogId}/journal`, { imageURL, description });

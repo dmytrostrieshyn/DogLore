@@ -17,7 +17,7 @@ function App() {
         <AuthProvider>
             <Router>
                 <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/encyclopedia" element={<Encyclopedia />} />
                     <Route path="/encyclopedia/:breedId" element={<BreedDetails />} />

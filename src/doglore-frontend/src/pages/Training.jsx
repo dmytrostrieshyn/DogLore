@@ -1,47 +1,68 @@
 import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Navbar from './layout/Navbar';
-import { fetchTrainingLogs, updateTrainingNotes } from '../services/api/trainingApi';
-import { fetchDogFullProfile } from '../services/api/dogsApi';
+import { fetchTrainingLogs, updateTrainingNotes, toggleTrainingDate } from '../services/api/trainingApi';
+import { fetchDogFullProfile, addNewCommand, updateCommandProgress } from '../services/api/dogsApi';
 import { useAuth } from '../context/AuthContext';
-
-// Імпортуємо SVG-іконку для кнопки додавання команди
 import addCommandIcon from '../assets/icons/add_command.svg';
+
+const MONTHS_UK = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const INPUT = "border border-[#EAE8E7] bg-[#F6F3F2] rounded-xl px-3 py-2 font-inter text-sm text-[#1B1C1C] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#1A2B21] w-full";
+
+function generateCalendar(year, month) {
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+    return cells;
+}
+
+function dateStr(year, month, day) {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
 
 export default function Training() {
     const { dogId } = useAuth();
+    const [dog, setDog] = useState(null);
     const [commands, setCommands] = useState([]);
     const [notes, setNotes] = useState('');
     const [completedDates, setCompletedDates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [notesSaved, setNotesSaved] = useState(false);
+
+    // Calendar state — current month
+    const now = new Date();
+    const [calYear] = useState(now.getFullYear());
+    const [calMonth] = useState(now.getMonth());
+
+    // Add command form
+    const [showAddCommand, setShowAddCommand] = useState(false);
+    const [newCommandName, setNewCommandName] = useState('');
+    const [savingCommand, setSavingCommand] = useState(false);
 
     useEffect(() => {
-        if (!dogId) return;
-        
+        if (!dogId) { setLoading(false); return; }
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Тягнемо паралельно команди (підколекція) та сам профіль (для приміток)
                 const [logsData, profileData] = await Promise.all([
                     fetchTrainingLogs(dogId),
-                    fetchDogFullProfile(dogId)
+                    fetchDogFullProfile(dogId),
                 ]);
-
                 setCommands(logsData || []);
-                
-                // Якщо в базі є збережені примітки та дати — підтягуємо їх
                 if (profileData) {
+                    setDog(profileData);
                     setNotes(profileData.trainingNotes || '');
                     setCompletedDates(profileData.completedTrainingDates || []);
                 }
             } catch (err) {
-                console.error("Помилка завантаження трекінгу:", err);
+                console.error('Помилка завантаження трекінгу:', err);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [dogId]);
 
@@ -49,36 +70,76 @@ export default function Training() {
         setSaving(true);
         try {
             await updateTrainingNotes(dogId, notes);
-            alert('Примітки успішно збережено!');
-            
-            // Локально додаємо сьогоднішню дату в стейт, щоб календар одразу оновився
-            const today = new Date().toISOString().split('T')[0]; // Формат YYYY-MM-DD
+            const today = new Date().toISOString().split('T')[0];
             if (!completedDates.includes(today)) {
                 setCompletedDates(prev => [...prev, today]);
             }
+            setNotesSaved(true);
+            setTimeout(() => setNotesSaved(false), 2000);
         } catch (e) {
             console.error(e);
-            alert('Помилка при збереженні приміток');
         } finally {
             setSaving(false);
         }
     };
+
+    const handleToggleDate = async (day) => {
+        const ds = dateStr(calYear, calMonth, day);
+        const was = completedDates.includes(ds);
+        setCompletedDates(prev => was ? prev.filter(d => d !== ds) : [...prev, ds]);
+        try {
+            await toggleTrainingDate(dogId, ds, was);
+        } catch (err) {
+            // revert on error
+            setCompletedDates(prev => was ? [...prev, ds] : prev.filter(d => d !== ds));
+        }
+    };
+
+    const handleProgressChange = async (cmd, delta) => {
+        const newVal = Math.min(100, Math.max(0, (Number(cmd.progress) || 0) + delta));
+        setCommands(prev => prev.map(c => c.id === cmd.id ? { ...c, progress: newVal } : c));
+        try {
+            await updateCommandProgress(dogId, cmd.id, newVal);
+        } catch (err) {
+            console.error('Помилка оновлення прогресу:', err);
+        }
+    };
+
+    const handleAddCommand = async () => {
+        if (!newCommandName.trim() || !dogId) return;
+        setSavingCommand(true);
+        try {
+            const id = await addNewCommand(dogId, newCommandName.trim());
+            setCommands(prev => [...prev, { id, name: newCommandName.trim(), progress: 0 }]);
+            setNewCommandName('');
+            setShowAddCommand(false);
+        } catch (err) {
+            console.error('Помилка додавання команди:', err);
+        } finally {
+            setSavingCommand(false);
+        }
+    };
+
+    const calCells = generateCalendar(calYear, calMonth);
+    const today = now.toISOString().split('T')[0];
 
     return (
         <div className="min-h-screen bg-bg-main">
             <Navbar />
             <div className="flex">
                 <Sidebar />
-
                 <main className="flex-1 p-8 md:p-12">
                     <h1 className="text-4xl mb-2 font-montserrat font-bold text-[#1A2B21]">Прогрес дресирування</h1>
-                    <p className="text-sm mb-10 text-text-muted">Відстеження розвитку Бадді та нових навичок за допомогою лагідного виховання.</p>
+                    <p className="text-sm mb-10 text-text-muted">
+                        Відстеження розвитку {dog?.name || '...'} та нових навичок за допомогою лагідного виховання.
+                    </p>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Ліва частина: Команди та Примітки */}
+
+                        {/* Left — commands + notes */}
                         <div className="lg:col-span-2 space-y-8">
-                            
-                            {/* Картка команд */}
+
+                            {/* Commands card */}
                             <div className="bg-white p-8 rounded-[32px] shadow-sm border border-surface-primary">
                                 <div className="flex justify-between items-center mb-8">
                                     <h3 className="text-2xl font-bold font-montserrat">Активні команди</h3>
@@ -92,30 +153,39 @@ export default function Training() {
                                         <p className="text-text-muted animate-pulse">Завантаження команд...</p>
                                     ) : commands.length > 0 ? (
                                         commands.map((cmd, i) => {
-                                            // Переконуємось, що прогрес це число
                                             const progressVal = Number(cmd.progress) || 0;
-                                            const isMastered = progressVal === 100;
-
+                                            const isMastered = progressVal >= 100;
                                             return (
                                                 <div key={cmd.id || i} className="space-y-2">
                                                     <div className="flex justify-between items-center text-sm font-bold">
                                                         <div className="flex items-center gap-4">
-                                                            {/* Кастомний чекбокс */}
-                                                            <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center transition-colors border-2 ${isMastered ? 'bg-[#1A2B21] border-[#1A2B21]' : 'bg-transparent border-gray-300'}`}>
+                                                            <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center border-2 transition-colors ${isMastered ? 'bg-[#1A2B21] border-[#1A2B21]' : 'bg-transparent border-gray-300'}`}>
                                                                 {isMastered && (
                                                                     <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                                     </svg>
                                                                 )}
                                                             </div>
-                                                            <span className="text-base text-[#1A2B21]">{cmd.name}</span>
+                                                            <span className={`text-base ${isMastered ? 'line-through text-text-muted' : 'text-[#1A2B21]'}`}>{cmd.name}</span>
                                                         </div>
-                                                        <span className="text-text-muted text-xs">{progressVal}% Mastery</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleProgressChange(cmd, -10)}
+                                                                disabled={progressVal <= 0}
+                                                                className="w-6 h-6 rounded-full bg-[#F6F3F2] border border-[#EAE8E7] text-[#1A2B21] font-bold text-sm flex items-center justify-center hover:bg-[#EAE8E7] disabled:opacity-30 transition-all"
+                                                            >−</button>
+                                                            <span className="text-xs text-text-muted w-10 text-center">{progressVal}%</span>
+                                                            <button
+                                                                onClick={() => handleProgressChange(cmd, 10)}
+                                                                disabled={progressVal >= 100}
+                                                                className="w-6 h-6 rounded-full bg-[#F6F3F2] border border-[#EAE8E7] text-[#1A2B21] font-bold text-sm flex items-center justify-center hover:bg-[#EAE8E7] disabled:opacity-30 transition-all"
+                                                            >+</button>
+                                                        </div>
                                                     </div>
-                                                    <div className="h-2.5 bg-[#F9ECE4] rounded-full overflow-hidden mt-2">
-                                                        <div 
-                                                            className="h-full bg-[#F2C9B3] transition-all duration-700 rounded-full" 
-                                                            style={{ width: `${progressVal}%` }} 
+                                                    <div className="h-2.5 bg-[#F9ECE4] rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-[#1A2B21] transition-all duration-500 rounded-full"
+                                                            style={{ width: `${progressVal}%` }}
                                                         />
                                                     </div>
                                                 </div>
@@ -125,19 +195,43 @@ export default function Training() {
                                         <p className="text-text-muted italic">Ще немає активних команд. Додайте першу!</p>
                                     )}
                                 </div>
+
+                                {/* Add command form */}
+                                {showAddCommand && (
+                                    <div className="mt-6 flex gap-3 items-center p-4 bg-[#F6F3F2] rounded-2xl border border-[#EAE8E7]">
+                                        <input
+                                            autoFocus
+                                            value={newCommandName}
+                                            onChange={e => setNewCommandName(e.target.value)}
+                                            onKeyDown={e => e.key === 'Enter' && handleAddCommand()}
+                                            placeholder="Наприклад: Дай лапу"
+                                            className={INPUT}
+                                        />
+                                        <button
+                                            onClick={handleAddCommand}
+                                            disabled={savingCommand || !newCommandName.trim()}
+                                            className="bg-[#1A2B21] text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-[#2D4739] transition-all disabled:opacity-50 shrink-0"
+                                        >
+                                            {savingCommand ? '...' : 'Додати'}
+                                        </button>
+                                        <button onClick={() => { setShowAddCommand(false); setNewCommandName(''); }}
+                                            className="px-3 py-2 text-text-muted hover:bg-[#EAE8E7] rounded-xl transition-all shrink-0">✕</button>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Примітки */}
+                            {/* Notes */}
                             <div className="bg-white p-8 rounded-[32px] shadow-sm border border-surface-primary">
                                 <h3 className="text-2xl font-bold mb-6 font-montserrat">Примітки до тренувань</h3>
                                 <textarea
                                     value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    className="w-full bg-[#F8F9FA] rounded-[24px] p-6 text-sm focus:outline-none border border-transparent focus:border-[#F2C9B3] min-h-[160px] resize-none text-text-primary"
-                                    placeholder="Сьогодні Бадді добре реагує на смачні ласощі..."
+                                    onChange={e => setNotes(e.target.value)}
+                                    className="w-full bg-[#F8F9FA] rounded-[24px] p-6 text-sm focus:outline-none border border-transparent focus:border-[#EAE8E7] min-h-[160px] resize-none text-text-primary"
+                                    placeholder={`Сьогодні ${dog?.name || 'пес'} добре реагує на ласощі...`}
                                 />
-                                <div className="flex justify-end mt-4">
-                                    <button 
+                                <div className="flex justify-end items-center gap-4 mt-4">
+                                    {notesSaved && <span className="text-sm text-[#1A2B21] font-bold">✓ Збережено</span>}
+                                    <button
                                         onClick={handleSaveNotes}
                                         disabled={saving}
                                         className="bg-[#1A2B21] text-white px-8 py-3 rounded-full font-bold hover:bg-opacity-90 disabled:opacity-50 transition-all shadow-md"
@@ -146,71 +240,46 @@ export default function Training() {
                                     </button>
                                 </div>
                             </div>
-
                         </div>
 
-                        {/* Права частина */}
+                        {/* Right — calendar + add command */}
                         <div className="space-y-6">
-                            
-                            {/* Календар */}
+
+                            {/* Calendar */}
                             <div className="bg-[#1A2B21] text-white p-8 rounded-[32px] shadow-lg">
                                 <h4 className="font-bold mb-6 font-montserrat text-sm flex justify-between">
-                                    <span>Жовтень 2026</span>
-                                    <span className="text-brand-accent text-[10px] uppercase">Активних днів: {completedDates.length}</span>
+                                    <span>{MONTHS_UK[calMonth]} {calYear}</span>
+                                    <span className="text-[#F2C9B3] text-[10px] uppercase">Днів: {completedDates.filter(d => d.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`)).length}</span>
                                 </h4>
-                                <div className="grid grid-cols-7 gap-y-4 text-[10px] text-center font-bold items-center">
-                                    <span className="text-white/50 mb-2">S</span>
-                                    <span className="text-white/50 mb-2">M</span>
-                                    <span className="text-white/50 mb-2">T</span>
-                                    <span className="text-white/50 mb-2">W</span>
-                                    <span className="text-white/50 mb-2">T</span>
-                                    <span className="text-white/50 mb-2">F</span>
-                                    <span className="text-white/50 mb-2">S</span>
-                                    
-                                    {/* Візуал календаря. В майбутньому тут можна додати логіку генерації чисел місяця 
-                                        та перевірку completedDates.includes(`2026-10-${day}`) */}
-                                    <div className="text-white/30 font-medium">29</div>
-                                    <div className="text-white/30 font-medium">30</div>
-                                    <div className="font-medium">1</div>
-                                    <div className="w-7 h-7 mx-auto flex items-center justify-center bg-[#F2C9B3] text-[#1A2B21] rounded-full cursor-pointer hover:scale-110 transition-transform">2</div>
-                                    <div className="font-medium">3</div>
-                                    <div className="font-medium">4</div>
-                                    <div className="font-medium">5</div>
-                                    
-                                    <div className="font-medium">6</div>
-                                    <div className="w-7 h-7 mx-auto flex items-center justify-center bg-[#F2C9B3] text-[#1A2B21] rounded-full cursor-pointer hover:scale-110 transition-transform">7</div>
-                                    <div className="font-medium">8</div>
-                                    <div className="font-medium">9</div>
-                                    <div className="font-medium">10</div>
-                                    <div className="font-medium">11</div>
-                                    <div className="font-medium">12</div>
-                                    
-                                    <div className="font-medium">13</div>
-                                    <div className="font-medium">14</div>
-                                    <div className="w-7 h-7 mx-auto flex items-center justify-center bg-[#F2C9B3] text-[#1A2B21] rounded-full cursor-pointer hover:scale-110 transition-transform">15</div>
-                                    <div className="w-7 h-7 mx-auto flex items-center justify-center border-2 border-white rounded-full cursor-pointer">16</div>
-                                    <div className="font-medium">17</div>
-                                    <div className="font-medium">18</div>
-                                    <div className="font-medium">19</div>
+                                <div className="grid grid-cols-7 gap-y-3 text-[10px] text-center font-bold">
+                                    {['S','M','T','W','T','F','S'].map((d, i) => (
+                                        <span key={i} className="text-white/50 mb-1">{d}</span>
+                                    ))}
+                                    {calCells.map((day, i) => {
+                                        if (!day) return <div key={i} />;
+                                        const ds = dateStr(calYear, calMonth, day);
+                                        const isCompleted = completedDates.includes(ds);
+                                        const isToday = ds === today;
+                                        return (
+                                            <div
+                                                key={i}
+                                                onClick={() => handleToggleDate(day)}
+                                                className={`w-7 h-7 mx-auto flex items-center justify-center rounded-full cursor-pointer transition-all hover:scale-110 text-[11px]
+                                                    ${isCompleted ? 'bg-[#F2C9B3] text-[#1A2B21] font-bold' : isToday ? 'border-2 border-white' : 'font-medium hover:bg-white/10'}`}
+                                            >
+                                                {day}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
+                                <p className="text-white/40 text-[9px] text-center mt-4 uppercase tracking-wider">Натисніть на день щоб відмітити тренування</p>
                             </div>
 
-                            {/* Картка Нова ціль */}
-                            <div className="relative overflow-hidden rounded-[32px] aspect-[4/3] group cursor-pointer shadow-sm">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=500" 
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                                    alt="Goal" 
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#6B3A23]/90 via-[#6B3A23]/50 to-transparent p-8 flex flex-col justify-end text-white">
-                                    <h4 className="font-bold text-2xl leading-tight mb-2 font-montserrat">Нова ціль: Без повідця</h4>
-                                    <p className="text-sm opacity-90 mb-4">Вам залишилося всього 4 заняття до початку тренувань без повідця в саду.</p>
-                                    <span className="text-sm font-light">Дізнатися більше</span>
-                                </div>
-                            </div>
-
-                            {/* Кнопка "Додати команду" */}
-                            <div className="border border-dashed border-gray-300 bg-[#F8F9FA] rounded-[32px] p-8 text-center flex flex-col items-center justify-center gap-4 hover:bg-white transition-colors cursor-pointer group">
+                            {/* Add command button */}
+                            <div
+                                onClick={() => setShowAddCommand(true)}
+                                className="border border-dashed border-gray-300 bg-[#F8F9FA] rounded-[32px] p-8 text-center flex flex-col items-center justify-center gap-4 hover:bg-white transition-colors cursor-pointer group"
+                            >
                                 <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300 border border-gray-100">
                                     <img src={addCommandIcon} alt="Додати" className="w-4 h-4 opacity-80" />
                                 </div>
@@ -219,7 +288,6 @@ export default function Training() {
                                     <p className="text-xs text-text-muted mt-1">Поруч, Дай лапу або Перевернись</p>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </main>
