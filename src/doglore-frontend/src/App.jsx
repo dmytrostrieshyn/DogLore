@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Training from './pages/Training';
 import DogProfile from './pages/DogProfile';
 import Encyclopedia from './pages/Encyclopedia';
+import BreedDetails from './pages/BreedDetails';
 import Auth from './pages/Auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -19,6 +20,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/encyclopedia" element={<Encyclopedia />} />
+                    <Route path="/encyclopedia/:breedId" element={<BreedDetails />} />
                     <Route path="/profile" element={<ProtectedRoute><DogProfile /></ProtectedRoute>} />
                     <Route path="/training" element={<ProtectedRoute><Training /></ProtectedRoute>} />
                 </Routes>

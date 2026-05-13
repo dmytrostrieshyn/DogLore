@@ -75,12 +75,11 @@ export default function Encyclopedia() {
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                             {breeds.map((breed) => (
-                                <DogCard 
-                                    key={breed.id} 
-                                    name={breed.name} 
-                                    // Firebase зазвичай використовує imageURL або image_url
-                                    image={breed.imageURL || breed.image_url} 
-                                    // Передаємо правильне поле для бейджа (якщо воно називається інакше в базі)
+                                <DogCard
+                                    key={breed.id}
+                                    id={breed.id}
+                                    name={breed.name}
+                                    image={breed.imageURL || breed.image_url}
                                     type={breed.type || breed.category || breed.group}
                                     size={breed.size}
                                     description={breed.description}
