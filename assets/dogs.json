@@ -1,0 +1,202 @@
+[
+  {
+    "id": "golden-retriever",
+    "name": "Золотистий ретривер",
+    "origin": "Шотландія",
+    "size": "Великий",
+    "life_expectancy": "10-12 років",
+    "temperament": ["Дружелюбний", "Розумний", "Відданий"],
+    "description": "Одна з найпопулярніших порід у світі завдяки своєму доброзичливому характеру.",
+    "image_url": "assets/images/golden_retriever.jpg"
+  },
+  {
+    "id": "french-bulldog",
+    "name": "Французький бульдог",
+    "origin": "Франція",
+    "size": "Малий",
+    "life_expectancy": "10-14 років",
+    "temperament": ["Грайливий", "Товариський", "Спокійний"],
+    "description": "Чудовий компаньйон для життя в міській квартирі.",
+    "image_url": "assets/images/french_bulldog.jpg"
+  },
+  {
+    "id": "german-shepherd",
+    "name": "Німецька вівчарка",
+    "origin": "Німеччина",
+    "size": "Великий",
+    "life_expectancy": "9-13 років",
+    "temperament": ["Впевнений", "Розумний", "Мужній"],
+    "description": "Відома своєю універсальністю, відданістю та здібностями до навчання.",
+    "image_url": "assets/images/german_shepherd.jpg"
+  },
+  {
+    "id": "labrador-retriever",
+    "name": "Лабрадор-ретривер",
+    "origin": "Канада",
+    "size": "Великий",
+    "life_expectancy": "10-12 років",
+    "temperament": ["Активний", "Доброзичливий", "Лагідний"],
+    "description": "Чудовий сімейний собака, який обожнює воду та активні ігри.",
+    "image_url": "assets/images/labrador.jpg"
+  },
+  {
+    "id": "beagle",
+    "name": "Бігль",
+    "origin": "Велика Британія",
+    "size": "Середній",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Веселий", "Цікавий", "Дружелюбний"],
+    "description": "Маленький мисливський собака з неймовірним нюхом та доброю вдачею.",
+    "image_url": "assets/images/beagle.jpg"
+  },
+  {
+    "id": "poodle",
+    "name": "Пудль",
+    "origin": "Франція/Німеччина",
+    "size": "Різний",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Розумний", "Активний", "Вишуканий"],
+    "description": "Одна з найрозумніших порід, яка майже не линяє.",
+    "image_url": "assets/images/poodle.jpg"
+  },
+  {
+    "id": "rottweiler",
+    "name": "Ротвейлер",
+    "origin": "Німеччина",
+    "size": "Великий",
+    "life_expectancy": "8-10 років",
+    "temperament": ["Вірний", "Стриманий", "Впевнений"],
+    "description": "Потужний захисник і вірний друг для своєї родини.",
+    "image_url": "assets/images/rottweiler.jpg"
+  },
+  {
+    "id": "dachshund",
+    "name": "Такса",
+    "origin": "Німеччина",
+    "size": "Малий",
+    "life_expectancy": "12-16 років",
+    "temperament": ["Сміливий", "Впертий", "Грайливий"],
+    "description": "Відома своїм довгим тілом і великою відвагою.",
+    "image_url": "assets/images/dachshund.jpg"
+  },
+  {
+    "id": "siberian-husky",
+    "name": "Сибірський хаскі",
+    "origin": "Сибір",
+    "size": "Середній",
+    "life_expectancy": "12-14 років",
+    "temperament": ["Товариський", "Пустотливий", "Працьовитий"],
+    "description": "Спортивна собака з густою шерстю, яка любить бігати на великі відстані.",
+    "image_url": "assets/images/husky.jpg"
+  },
+  {
+    "id": "boxer",
+    "name": "Боксер",
+    "origin": "Німеччина",
+    "size": "Великий",
+    "life_expectancy": "10-12 років",
+    "temperament": ["Веселий", "Енергійний", "Відданий"],
+    "description": "Відомий своїм грайливим характером і терпінням до дітей.",
+    "image_url": "assets/images/boxer.jpg"
+  },
+  {
+    "id": "pomeranian",
+    "name": "Померанський шпіц",
+    "origin": "Польща/Німеччина",
+    "size": "Малий",
+    "life_expectancy": "12-16 років",
+    "temperament": ["Жвавий", "Товариський", "Розумний"],
+    "description": "Крихітний собака з пишною шерстю та великою особистістю.",
+    "image_url": "assets/images/pomeranian.jpg"
+  },
+  {
+    "id": "doberman",
+    "name": "Доберман",
+    "origin": "Німеччина",
+    "size": "Великий",
+    "life_expectancy": "10-12 років",
+    "temperament": ["Пильний", "Безстрашний", "Відданий"],
+    "description": "Елегантний захисник з блискавичною реакцією.",
+    "image_url": "assets/images/doberman.jpg"
+  },
+  {
+    "id": "border-collie",
+    "name": "Бордер-коллі",
+    "origin": "Велика Британія",
+    "size": "Середній",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Надзвичайно розумний", "Енергійний", "Спритний"],
+    "description": "Вважається найрозумнішою породою собак у світі.",
+    "image_url": "assets/images/border_collie.jpg"
+  },
+  {
+    "id": "chihuahua",
+    "name": "Чихуахуа",
+    "origin": "Мексика",
+    "size": "Дуже малий",
+    "life_expectancy": "14-20 років",
+    "temperament": ["Відданий", "Самовпевнений", "Швидкий"],
+    "description": "Найменший собака у світі з дуже довгим терміном життя.",
+    "image_url": "assets/images/chihuahua.jpg"
+  },
+  {
+    "id": "pug",
+    "name": "Мопс",
+    "origin": "Китай",
+    "size": "Малий",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Чарівний", "Пустотливий", "Мирний"],
+    "description": "Маленький собака з великим почуттям гумору.",
+    "image_url": "assets/images/pug.jpg"
+  },
+  {
+    "id": "jack-russell",
+    "name": "Джек-рассел-тер'єр",
+    "origin": "Велика Британія",
+    "size": "Малий",
+    "life_expectancy": "13-16 років",
+    "temperament": ["Невтомний", "Сміливий", "Розумний"],
+    "description": "Енергійна собака, яка потребує багато активності та ігор.",
+    "image_url": "assets/images/jack_russell.jpg"
+  },
+  {
+    "id": "cocker-spaniel",
+    "name": "Кокер-спанієль",
+    "origin": "Велика Британія",
+    "size": "Середній",
+    "life_expectancy": "12-15 років",
+    "temperament": ["Ніжний", "Радісний", "Чуйний"],
+    "description": "Красивий собака з довгими вухами та м'яким характером.",
+    "image_url": "assets/images/cocker_spaniel.jpg"
+  },
+  {
+    "id": "dalmatian",
+    "name": "Далматин",
+    "origin": "Хорватія",
+    "size": "Великий",
+    "life_expectancy": "11-13 років",
+    "temperament": ["Енергійний", "Розумний", "Товариський"],
+    "description": "Легко впізнаваний завдяки своїм чорним плямам на білій шерсті.",
+    "image_url": "assets/images/dalmatian.jpg"
+  },
+  {
+    "id": "shiba-inu",
+    "name": "Шіба-іну",
+    "origin": "Японія",
+    "size": "Середній",
+    "life_expectancy": "13-16 років",
+    "temperament": ["Незалежний", "Вірний", "Пильний"],
+    "description": "Найпопулярніша японська порода, схожа на маленьку лисицю.",
+    "image_url": "assets/images/shiba_inu.jpg"
+  },
+  {
+    "id": "chow-chow",
+    "name": "Чау-чау",
+    "origin": "Китай",
+    "size": "Великий",
+    "life_expectancy": "8-12 років",
+    "temperament": ["Гордий", "Незалежний", "Відданий"],
+    "description": "Відомий своєю левовою гривою та фіолетовим язиком.",
+    "image_url": "assets/images/chow_chow.jpg"
+  }
+]
