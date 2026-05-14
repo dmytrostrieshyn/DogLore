@@ -20,7 +20,7 @@ export default function DogCard({ id, name, size, description, type, image, temp
             <div className="p-6 flex-1 flex flex-col">
                 <h3 className="font-montserrat font-bold text-xl mb-1 text-text-primary">{name}</h3>
                 <p className="text-[12px] text-text-muted mb-4 flex items-center gap-2 font-bold">
-                    <span className="grayscale opacity-70">🏠</span> {size || 'Середній'}
+                     {size || 'Середній'}
                 </p>
                 <p className="text-sm text-text-secondary line-clamp-3 leading-relaxed">
                     {description || "Детальний опис цієї породи скоро з'явиться..."}

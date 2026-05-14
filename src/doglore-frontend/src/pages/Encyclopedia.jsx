@@ -63,21 +63,6 @@ export default function Encyclopedia() {
                                 />
                             ))}
                         </div>
-
-                        {/* Пагінація з SVG іконками next.svg */}
-                        <div className="mt-20 flex justify-center items-center gap-6">
-                            <button className="w-12 h-12 flex items-center justify-center border border-surface-primary rounded-full hover:bg-white hover:shadow-md transition-all active:scale-95 bg-transparent">
-                                <img src={nextIcon} alt="Попередня" className="w-4 h-4 rotate-180 opacity-60" />
-                            </button>
-                            
-                            <span className="text-sm font-black text-text-primary uppercase tracking-widest">
-                                Сторінка 1 із 24
-                            </span>
-                            
-                            <button className="w-12 h-12 flex items-center justify-center border border-surface-primary rounded-full hover:bg-white hover:shadow-md transition-all active:scale-95 bg-transparent">
-                                <img src={nextIcon} alt="Наступна" className="w-4 h-4 opacity-60" />
-                            </button>
-                        </div>
                     </>
                 )}
             </main>
