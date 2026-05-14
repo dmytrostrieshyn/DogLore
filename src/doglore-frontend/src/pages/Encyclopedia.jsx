@@ -41,31 +41,7 @@ export default function Encyclopedia() {
                     </p>
                 </div>
 
-                {/* Блок фільтрів та пошуку */}
-                <div className="flex flex-col md:flex-row gap-4 mb-12">
-                    <div className="flex-1 relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40 text-lg">🔍</span>
-                        <input
-                            type="text"
-                            placeholder="Пошук порід (напр. Золотистий ретривер)"
-                            className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white border border-surface-primary focus:outline-none focus:ring-2 ring-brand-light-sage/30 transition shadow-sm font-inter text-text-primary placeholder:text-text-muted"
-                        />
-                    </div>
-                    <select className="px-6 py-4 rounded-2xl bg-white border border-surface-primary font-bold text-text-secondary outline-none cursor-pointer">
-                        <option>За розміром</option>
-                        <option>Малі</option>
-                        <option>Середні</option>
-                        <option>Великі</option>
-                    </select>
-                    <select className="px-6 py-4 rounded-2xl bg-white border border-surface-primary font-bold text-text-secondary outline-none cursor-pointer">
-                        <option>За призначенням</option>
-                        <option>Мисливські</option>
-                        <option>Пастуші</option>
-                        <option>Робочі</option>
-                    </select>
-                </div>
-
-                {/* Стан завантаження або сітка карток */}
+               {/* Стан завантаження або сітка карток */}
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-6">
                         <img src={pawIcon} alt="Loading" className="w-12 h-12 animate-bounce opacity-40" />
