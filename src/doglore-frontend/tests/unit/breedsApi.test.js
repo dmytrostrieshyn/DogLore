@@ -1,6 +1,6 @@
-import { fetchAllBreeds, searchBreeds } from '../../src/services/api/breedsApi.js';
+import { fetchAllBreeds, searchBreeds, fetchBreedById } from '../../src/services/api/breedsApi.js';
 import { getCollectionData } from '../../src/services/dbService.js';
-import { getDocs, collection, query, where } from 'firebase/firestore';
+import { getDocs, collection, query, where, doc, getDoc } from 'firebase/firestore';
 
 jest.mock('../../src/services/dbService.js', () => ({
   getCollectionData: jest.fn(),
@@ -15,6 +15,8 @@ jest.mock('firebase/firestore', () => ({
   query: jest.fn(),
   where: jest.fn(),
   getDocs: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn(),
 }));
 
 describe('breedsApi', () => {
@@ -75,6 +77,37 @@ describe('breedsApi', () => {
 
       expect(where).toHaveBeenCalledWith('name', '>=', 'Lab');
       expect(where).toHaveBeenCalledWith('name', '<=', 'Lab');
+    });
+  });
+
+  describe('fetchBreedById', () => {
+    it('returns breed data with id when breed exists', async () => {
+      const breedData = { name: 'Poodle', size: 'medium', origin: 'France' };
+      doc.mockReturnValue('breedRef');
+      getDoc.mockResolvedValue({ exists: () => true, id: 'b1', data: () => breedData });
+
+      const result = await fetchBreedById('b1');
+
+      expect(doc).toHaveBeenCalled();
+      expect(result).toEqual({ id: 'b1', name: 'Poodle', size: 'medium', origin: 'France' });
+    });
+
+    it('returns null when breed does not exist', async () => {
+      doc.mockReturnValue('breedRef');
+      getDoc.mockResolvedValue({ exists: () => false });
+
+      const result = await fetchBreedById('nonexistent');
+
+      expect(result).toBeNull();
+    });
+
+    it('passes the correct collection and ID to doc', async () => {
+      doc.mockReturnValue('breedRef');
+      getDoc.mockResolvedValue({ exists: () => false });
+
+      await fetchBreedById('abc123');
+
+      expect(doc).toHaveBeenCalledWith({}, 'breeds', 'abc123');
     });
   });
 });

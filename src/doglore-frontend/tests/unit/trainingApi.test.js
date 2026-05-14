@@ -1,6 +1,6 @@
-import { fetchTrainingLogs, updateTrainingNotes } from '../../src/services/api/trainingApi.js';
+import { fetchTrainingLogs, updateTrainingNotes, toggleTrainingDate } from '../../src/services/api/trainingApi.js';
 import { getSubcollectionData } from '../../src/services/dbService.js';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 jest.mock('../../src/services/firebase.js', () => ({ db: {} }));
 
@@ -12,6 +12,8 @@ jest.mock('firebase/firestore', () => ({
   doc: jest.fn(),
   updateDoc: jest.fn(),
   serverTimestamp: jest.fn(() => 'mock-timestamp'),
+  arrayUnion: jest.fn(),
+  arrayRemove: jest.fn(),
 }));
 
 describe('trainingApi', () => {
@@ -67,6 +69,64 @@ describe('trainingApi', () => {
       await updateTrainingNotes('dog1', 'test');
 
       expect(serverTimestamp).toHaveBeenCalled();
+    });
+  });
+
+  describe('toggleTrainingDate', () => {
+    it('calls updateDoc with arrayRemove when the date was already completed', async () => {
+      doc.mockReturnValue('dogRef');
+      updateDoc.mockResolvedValue(undefined);
+      arrayRemove.mockReturnValue('arrayRemoveResult');
+
+      await toggleTrainingDate('dog1', '2024-01-15', true);
+
+      expect(arrayRemove).toHaveBeenCalledWith('2024-01-15');
+      expect(updateDoc).toHaveBeenCalledWith('dogRef', {
+        completedTrainingDates: 'arrayRemoveResult',
+      });
+    });
+
+    it('calls updateDoc with arrayUnion when the date was not yet completed', async () => {
+      doc.mockReturnValue('dogRef');
+      updateDoc.mockResolvedValue(undefined);
+      arrayUnion.mockReturnValue('arrayUnionResult');
+
+      await toggleTrainingDate('dog1', '2024-01-15', false);
+
+      expect(arrayUnion).toHaveBeenCalledWith('2024-01-15');
+      expect(updateDoc).toHaveBeenCalledWith('dogRef', {
+        completedTrainingDates: 'arrayUnionResult',
+      });
+    });
+
+    it('does not call arrayUnion when removing a date', async () => {
+      doc.mockReturnValue('dogRef');
+      updateDoc.mockResolvedValue(undefined);
+      arrayRemove.mockReturnValue('arrayRemoveResult');
+
+      await toggleTrainingDate('dog1', '2024-01-15', true);
+
+      expect(arrayUnion).not.toHaveBeenCalled();
+    });
+
+    it('does not call arrayRemove when adding a date', async () => {
+      doc.mockReturnValue('dogRef');
+      updateDoc.mockResolvedValue(undefined);
+      arrayUnion.mockReturnValue('arrayUnionResult');
+
+      await toggleTrainingDate('dog1', '2024-01-15', false);
+
+      expect(arrayRemove).not.toHaveBeenCalled();
+    });
+
+    it('targets the correct dog document', async () => {
+      doc.mockReturnValue('dogRef');
+      updateDoc.mockResolvedValue(undefined);
+      arrayUnion.mockReturnValue('arrayUnionResult');
+
+      await toggleTrainingDate('dog99', '2024-06-01', false);
+
+      expect(doc).toHaveBeenCalledWith({}, 'dogs', 'dog99');
     });
   });
 });
