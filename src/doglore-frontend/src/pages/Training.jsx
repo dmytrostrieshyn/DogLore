@@ -6,7 +6,7 @@ import { fetchDogFullProfile, addNewCommand, updateCommandProgress } from '../se
 import { useAuth } from '../context/AuthContext';
 import addCommandIcon from '../assets/icons/add_command.svg';
 
-const MONTHS_UK = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const MONTHS_UK = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
 const INPUT = "border border-[#EAE8E7] bg-[#F6F3F2] rounded-xl px-3 py-2 font-inter text-sm text-[#1B1C1C] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#1A2B21] w-full";
 
 function generateCalendar(year, month) {
@@ -28,56 +28,71 @@ export default function Training() {
     const [commands, setCommands] = useState([]);
     const [notes, setNotes] = useState('');
     const [completedDates, setCompletedDates] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // FIXED: Ініціалізуємо loading значенням true, якщо у нас є dogId
+    const [loading, setLoading] = useState(!!dogId);
     const [saving, setSaving] = useState(false);
     const [notesSaved, setNotesSaved] = useState(false);
 
-    // Calendar state — current month
     const now = new Date();
     const [calYear] = useState(now.getFullYear());
     const [calMonth] = useState(now.getMonth());
 
-    // Add command form
     const [showAddCommand, setShowAddCommand] = useState(false);
     const [newCommandName, setNewCommandName] = useState('');
     const [savingCommand, setSavingCommand] = useState(false);
 
+    // ── FIXED: Fetch Logic ──────────────────────────────────────────────────
     useEffect(() => {
-        if (!dogId) { setLoading(false); return; }
+        let isMounted = true;
+
         const fetchData = async () => {
-            setLoading(true);
+            // Якщо dogId немає, просто ставимо loading у false асинхронно
+            if (!dogId) {
+                if (isMounted) setLoading(false);
+                return;
+            }
+
             try {
+                // setLoading(true) викликається вже всередині асинхронного потоку
+                if (isMounted) setLoading(true);
+
                 const [logsData, profileData] = await Promise.all([
                     fetchTrainingLogs(dogId),
                     fetchDogFullProfile(dogId),
                 ]);
-                setCommands(logsData || []);
-                if (profileData) {
-                    setDog(profileData);
-                    setNotes(profileData.trainingNotes || '');
-                    setCompletedDates(profileData.completedTrainingDates || []);
+
+                if (isMounted) {
+                    setCommands(logsData || []);
+                    if (profileData) {
+                        setDog(profileData);
+                        setNotes(profileData.trainingNotes || '');
+                        setCompletedDates(profileData.completedTrainingDates || []);
+                    }
                 }
             } catch (err) {
                 console.error('Помилка завантаження трекінгу:', err);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
+
         fetchData();
+        return () => { isMounted = false; };
     }, [dogId]);
 
+    // Решта логіки обробників залишається такою ж, але з поправками на чистоту
     const handleSaveNotes = async () => {
         setSaving(true);
         try {
             await updateTrainingNotes(dogId, notes);
-            const today = new Date().toISOString().split('T')[0];
-            if (!completedDates.includes(today)) {
-                setCompletedDates(prev => [...prev, today]);
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (!completedDates.includes(todayStr)) {
+                setCompletedDates(prev => [...prev, todayStr]);
             }
             setNotesSaved(true);
             setTimeout(() => setNotesSaved(false), 2000);
         } catch (e) {
-            console.error(e);
+            console.error('Помилка збереження нотаток:', e);
         } finally {
             setSaving(false);
         }
@@ -90,7 +105,7 @@ export default function Training() {
         try {
             await toggleTrainingDate(dogId, ds, was);
         } catch (err) {
-            // revert on error
+            console.error('Помилка перемикання дати:', err);
             setCompletedDates(prev => was ? [...prev, ds] : prev.filter(d => d !== ds));
         }
     };
@@ -121,7 +136,7 @@ export default function Training() {
     };
 
     const calCells = generateCalendar(calYear, calMonth);
-    const today = now.toISOString().split('T')[0];
+    const todayStr = now.toISOString().split('T')[0];
 
     return (
         <div className="min-h-screen bg-bg-main">
@@ -135,10 +150,7 @@ export default function Training() {
                     </p>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                        {/* Left — commands + notes */}
                         <div className="lg:col-span-2 space-y-8">
-
                             {/* Commands card */}
                             <div className="bg-white p-8 rounded-[32px] shadow-sm border border-surface-primary">
                                 <div className="flex justify-between items-center mb-8">
@@ -196,7 +208,6 @@ export default function Training() {
                                     )}
                                 </div>
 
-                                {/* Add command form */}
                                 {showAddCommand && (
                                     <div className="mt-6 flex gap-3 items-center p-4 bg-[#F6F3F2] rounded-2xl border border-[#EAE8E7]">
                                         <input
@@ -242,24 +253,22 @@ export default function Training() {
                             </div>
                         </div>
 
-                        {/* Right — calendar + add command */}
+                        {/* Right — calendar */}
                         <div className="space-y-6">
-
-                            {/* Calendar */}
                             <div className="bg-[#1A2B21] text-white p-8 rounded-[32px] shadow-lg">
                                 <h4 className="font-bold mb-6 font-montserrat text-sm flex justify-between">
                                     <span>{MONTHS_UK[calMonth]} {calYear}</span>
-                                    <span className="text-[#F2C9B3] text-[10px] uppercase">Днів: {completedDates.filter(d => d.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`)).length}</span>
+                                    <span className="text-[#F2C9B3] text-[10px] uppercase">Днів: {completedDates.filter(d => d.startsWith(`${calYear}-${String(calMonth + 1).padStart(2, '0')}`)).length}</span>
                                 </h4>
                                 <div className="grid grid-cols-7 gap-y-3 text-[10px] text-center font-bold">
-                                    {['S','M','T','W','T','F','S'].map((d, i) => (
+                                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
                                         <span key={i} className="text-white/50 mb-1">{d}</span>
                                     ))}
                                     {calCells.map((day, i) => {
                                         if (!day) return <div key={i} />;
                                         const ds = dateStr(calYear, calMonth, day);
                                         const isCompleted = completedDates.includes(ds);
-                                        const isToday = ds === today;
+                                        const isToday = ds === todayStr;
                                         return (
                                             <div
                                                 key={i}
@@ -275,7 +284,6 @@ export default function Training() {
                                 <p className="text-white/40 text-[9px] text-center mt-4 uppercase tracking-wider">Натисніть на день щоб відмітити тренування</p>
                             </div>
 
-                            {/* Add command button */}
                             <div
                                 onClick={() => setShowAddCommand(true)}
                                 className="border border-dashed border-gray-300 bg-[#F8F9FA] rounded-[32px] p-8 text-center flex flex-col items-center justify-center gap-4 hover:bg-white transition-colors cursor-pointer group"

@@ -7,7 +7,6 @@ import { getCollectionData } from '../services/dbService';
 
 // Імпортуємо ваші SVG іконки
 import encyclopediaIcon from '../assets/icons/encyclopedia.svg';
-import nextIcon from '../assets/icons/next.svg';
 import pawIcon from '../assets/icons/paw.svg';
 
 export default function Encyclopedia() {

@@ -82,7 +82,7 @@ export default function DogProfile() {
     const [dog, setDog] = useState(null);
     const [weightData, setWeightData] = useState([]);
     const [galleryData, setGalleryData] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!!dogId);
 
     // Edit mode
     const [isEditing, setIsEditing] = useState(false);
@@ -121,43 +121,52 @@ export default function DogProfile() {
 
     // ── Fetch ─────────────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!dogId) { setLoading(false); return; }
+        // Якщо dogId немає, ми просто нічого не робимо (loading і так false)
+        if (!dogId) return;
+
         const load = async () => {
             try {
+                // setLoading(true) тут вже безпечний, бо ми всередині async функції
                 setLoading(true);
+
                 const [profile, history, gallery, journal] = await Promise.all([
                     fetchDogFullProfile(dogId),
                     fetchDogWeightHistory(dogId),
                     fetchDogGallery(dogId),
                     fetchJournalEntries(dogId),
                 ]);
+
+                // Оновлюємо основні дані
                 setDog(profile);
                 setWeightData(history || []);
                 setGalleryData(gallery || []);
                 setJournalEntries(journal || []);
+
+                // ТУТ КЛЮЧОВИЙ МОМЕНТ:
+                // Оновлюємо форму відразу після отримання профілю, 
+                // щоб не створювати каскадний рендер через другий useEffect
+                if (profile) {
+                    setForm({
+                        name: profile.name || '',
+                        dogAge: profile.dogAge ?? '',
+                        gender: profile.gender || '',
+                        breedName: profile.breedInfo?.name || profile.breedName || '',
+                        color: profile.color || '',
+                        height: profile.height || '',
+                        activityLevel: profile.activityLevel || '',
+                        chipNumber: profile.chipNumber || '',
+                        foodType: profile.foodType || '',
+                    });
+                }
             } catch (err) {
                 console.error('Помилка завантаження:', err);
             } finally {
                 setLoading(false);
             }
         };
+
         load();
     }, [dogId]);
-
-    useEffect(() => {
-        if (!dog) return;
-        setForm({
-            name:          dog.name          || '',
-            dogAge:        dog.dogAge        ?? '',
-            gender:        dog.gender        || '',
-            breedName:     dog.breedInfo?.name || dog.breedName || '',
-            color:         dog.color         || '',
-            height:        dog.height        || '',
-            activityLevel: dog.activityLevel || '',
-            chipNumber:    dog.chipNumber    || '',
-            foodType:      dog.foodType      || '',
-        });
-    }, [dog]);
 
     const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
