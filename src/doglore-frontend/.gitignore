@@ -1,0 +1,76 @@
+# Visual Studio files
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.shellmnt
+*.sln.docstates
+
+
+
+# Залежності (Node.js)
+node_modules/
+jspm_packages/
+.npm
+.eslintcache
+
+# Конфіденційні дані та змінні оточення
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+
+# Логи
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Бази даних (локальні файли)
+*.sqlite
+*.sqlite3
+*.db
+/data/
+/db/data/
+dump.rdb
+
+# Директорії збірки (Build)
+/dist/
+/build/
+/.next/
+/out/
+/.nuxt/
+/.cache/
+/.parcel-cache/
+
+# IDE та редактори
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Тести та покриття
+/coverage/
+/.nyc_output/
+
+# Інше
+.terraform/
+.serverless/
+
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
